@@ -11,3 +11,4 @@ usern -
 ladda in sidan -> 
 sign in  / sign up -> 
 
+![flowchart](/flode.png)
