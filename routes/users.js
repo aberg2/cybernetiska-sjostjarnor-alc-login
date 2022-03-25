@@ -20,6 +20,14 @@ router.get('/signup', function (req, res, next) {
 router.post('/signup', function (req, res, next) {
   const name = req.body.name
   const password = req.body.password
+  if (name.length < 4) {
+    res.send("Username is to short");
+  } else if (password.length < 4) {
+    res.send("PAssword to weAk");
+  }
+
+
+
 
   bcrypt.hash(password, 10, async function (err, hash) {
     console.log(hash)
