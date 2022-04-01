@@ -30,7 +30,7 @@ app.use(session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: { sameSite: true}
   }))
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);

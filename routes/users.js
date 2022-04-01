@@ -81,8 +81,8 @@ router.get('/content', function (req, res, next) {
   if (req.session.loggedin) {
     res.render('content.njk', { title: 'content' , name: req.session.name});
   } else {
-    res.json(req.session);
-    //res.redirect('/users/signin');
+  //  res.json(req.session);
+    res.redirect('/users/signin');
   }
 });
 
