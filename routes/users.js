@@ -51,10 +51,15 @@ router.post('/signin', async function (req, res, next) {
 router.post('/signup', function (req, res, next) {
   const name = req.body.name
   const password = req.body.password
+  const check = req.body.cpassword
   if (name.length < 4) {
     res.send("Username is to short");
   } else if (password.length < 4) {
     res.send("PAssword to weAk");
+    
+  } 
+  if (password !== check) {
+   return res.render('signup.njk', { title: 'signup', error: 'Passwords do not match' });
   }
 
 
@@ -66,7 +71,7 @@ router.post('/signup', function (req, res, next) {
       .promise()
       .query("INSERT INTO users (name,password) VALUES (?,?)", [name, hash])
       .then((response) => {
-        res.redirect('/users/signup');
+        res.redirect('/users/signin');
         console.log(response);
       })
       .catch((err) => {
@@ -74,6 +79,10 @@ router.post('/signup', function (req, res, next) {
 
       });
   });
+});
+router.get('/signout', function (req, res, next) {
+      req.session.destroy();
+      res.redirect('/users');
 });
 
 router.get('/content', function (req, res, next) {
@@ -84,6 +93,7 @@ router.get('/content', function (req, res, next) {
   //  res.json(req.session);
     res.redirect('/users/signin');
   }
+
 });
 
 
