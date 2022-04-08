@@ -22,7 +22,7 @@ router.post('/signin', async function (req, res, next) {
   const password = req.body.password
   await pool
   .promise()
-  .query("SELECT password FROM users WHERE name = ?", [name])
+  .query("SELECT id,password FROM users WHERE name = ?", [name])
   .then(([rows]) => {
     console.log(rows[0].password);
    bcrypt.compare(password, rows[0].password, function (err, result) {
@@ -30,7 +30,8 @@ router.post('/signin', async function (req, res, next) {
       if (result) {
       req.session.name = name;
       req.session.loggedin = true;
-      console.log(req.session.name);
+      req.session.userID = rows[0].id;
+      console.log(req.session.name, req.session.userID);
 
 
       //return res.json(req.session)
@@ -58,10 +59,10 @@ router.post('/signup', function (req, res, next) {
     res.send("PAssword to weAk");
     
   } 
-  if (password !== check) {
+/* if (password !== check) {
    return res.render('signup.njk', { title: 'signup', error: 'Passwords do not match' });
   }
-
+*/
 
 
 
@@ -85,15 +86,53 @@ router.get('/signout', function (req, res, next) {
       res.redirect('/users');
 });
 
-router.get('/content', function (req, res, next) {
+router.get('/content', async function (req, res, next) {
   console.log(req.session);
   if (req.session.loggedin) {
-    res.render('content.njk', { title: 'content' , name: req.session.name});
+    //res.render('content.njk', { title: 'content' , name: req.session.name});
+      await pool.promise()
+          .query('SELECT meeps.*,users.name FROM meeps JOIN users ON users.id=meeps.user_id ORDER BY created_at DESC')
+          .then(([rows, fields]) => {
+              res.render('content.njk', {
+                  meeps: rows,
+              });
+          })
+          .catch(err => {
+              console.log(err);
+              res.status(500).json({
+                  meeps: {
+                      error: 'Error gettings meeps'
+                  }
+              })
+          });  
+    
   } else {
   //  res.json(req.session);
     res.redirect('/users/signin');
   }
 
+});
+router.post('/', async (req, res, next) => {
+  // { "tweet": "koda post" }
+  const tweets = req.body.tweets;
+  const id = req.session.userID;
+  await pool
+      .promise()
+      .query('INSERT INTO meeps (body,user_id) VALUES (?,?)', [tweets, id])
+      .then((response) => {
+          if (response[0].affectedRows === 1) {
+              res.redirect('/users/content');
+          } else {
+              res.status(400).json({
+                  tweet: {
+                      error: 'Invalid tweet',
+                  },
+              });
+          }
+      })
+      .catch((err) => {
+          console.log(err);
+      });
 });
 
 
